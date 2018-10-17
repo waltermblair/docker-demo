@@ -1,3 +1,10 @@
+## initial setup
+```
+docker-compose -f stack.yml pull && docker-compose -f stack.yml up
+docker-compose down
+```
+replace db/store with db-schema/store
+
 ## running
 ```
 docker-compose -f stack.yml pull && docker-compose -f stack.yml up
