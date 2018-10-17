@@ -1,4 +1,5 @@
 ## initial setup
+edit stack.yml to pull brain and logic images from docker hub or from local registry (see below)
 ```
 docker-compose -f stack.yml pull && docker-compose -f stack.yml up
 docker-compose down
