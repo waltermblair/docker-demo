@@ -1,14 +1,15 @@
 ## initial setup
-edit stack.yml to pull brain and logic images from docker hub or from local registry (see below)
+Edit stack.yml to pull gui, brain, and logic images from docker hub or from local registry (see below).
+Note that for this intial setup, the db is force to initialize the db volume just so that we didn't have to check in all of those mysql files. We're running docker-compose once to initialize the db, copying the checked-in tables and pre-loaded data to the volume that was generated, and then restarting the container with the checked-in tables & data
 ```
 docker-compose -f stack.yml pull && docker-compose -f stack.yml up
 docker-compose down
+cp -rf db-schema/* db/db-schema/
+docker-compose -f stack.yml up
 ```
-replace db/store with db-schema/store
-
 ## running
 ```
-docker-compose -f stack.yml pull && docker-compose -f stack.yml up
+docker-compose -f stack.yml up
 ```
 
 ## local docker registry
@@ -23,6 +24,7 @@ docker run -d -p 5000:5000 --restart=always --name registry -v /mnt/registry:/va
 cd to your app:
 ```
 docker build . -t localhost:5000/my-app && docker push localhost:5000/my-app
+docker-compose -f stack.yml pull && docker-compose -f stack.yml up
 ```
 
 ## docker logging
