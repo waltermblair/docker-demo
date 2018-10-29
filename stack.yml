@@ -5,104 +5,109 @@ volumes:
     driver: local
 
 services:
-  gui: # https://mherman.org/blog/dockerizing-a-react-app/
-    image: localhost:5000/my-gui
-    container_name: gui
-    build:
-      context: ../app/
-      dockerfile: Dockerfile
-    volumes:
-      - ../app:/usr/src/app
-      - /usr/src/app/node_modules
-    ports:
-      - 3000:3000
-    environment:
-      - NODE_ENV=development
-    depends_on:
-      - brain
+#   gui: # https://mherman.org/blog/dockerizing-a-react-app/
+#     image: waltermblair/react
+#     image: localhost:5000/my-gui
+#     container_name: gui
+#     volumes:
+#       - ../app:/usr/src/app
+#       - /usr/src/app/node_modules
+#     ports:
+#       - 3000:3000
+#     environment:
+#       - NODE_ENV=development
+#     depends_on:
+#       - brain
 
-  brain:
-    # image: waltermblair/go-brain
-    image: localhost:5000/my-brain
-    container_name: brain
-    ports:
-      - 8080:8080
-    logging:
-      driver: json-file
-      options:
-        max-size: "200k"
-        max-file: "10"
-    external_links:
-      - rabbitmq:docker-rabbitmq
-      - db:docker-mysql
-    environment:
-      RABBIT_HOST: docker-rabbitmq
-      THIS_QUEUE: "0"
-      MYSQL_HOST: docker-mysql
-    depends_on:
-      - rabbitmq
-      - db
+#   brain:
+#     image: waltermblair/go-brain
+#     #image: localhost:5000/my-brain
+#     container_name: brain
+#     ports:
+#       - 8080:8080
+#     logging:
+#       driver: json-file
+#       options:
+#         max-size: "200k"
+#         max-file: "10"
+#     external_links:
+#       - rabbitmq:docker-rabbitmq
+#       - db:docker-mysql
+#     environment:
+#       RABBIT_HOST: docker-rabbitmq
+#       THIS_QUEUE: "0"
+#       MYSQL_HOST: docker-mysql
+#     depends_on:
+#       - rabbitmq
+#       - db
 
-# # TODO - deploy: mode: replicated replicas: 2
-  logic:
-    # image: waltermblair/go-logic
-    image: localhost:5000/my-logic
-    container_name: logic1
-    external_links:
-      - rabbitmq:docker-rabbitmq
-    environment: 
-      RABBIT_HOST: docker-rabbitmq
-      THIS_QUEUE: "1"
-    ports:
-      - 8081:8080
-    depends_on:
-      - rabbitmq
+# # # TODO - deploy: mode: replicated replicas: 2
+#   logic:
+#     image: waltermblair/go-logic
+#     # image: localhost:5000/my-logic
+#     container_name: logic1
+#     external_links:
+#       - rabbitmq:docker-rabbitmq
+#     environment: 
+#       RABBIT_HOST: docker-rabbitmq
+#       THIS_QUEUE: "1"
+#     ports:
+#       - 8081:8080
+#     depends_on:
+#       - rabbitmq
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: "guest"
-      RABBITMQ_DEFAULT_PASS: "guest"
-      RABBITMQ_DEFAULT_VHOST: "/"
-    expose:
-      - "5672"
-    ports:
-      - 15672:15672
-      - 5672:5672
-    volumes:
-      - ./rabbit/rabbitmq.conf:/etc/rabbitmq.conf:ro
-      - ./rabbit/rabbitDefs.json:/etc/rabbitmq/definitions.json:ro
+#   rabbitmq:
+#     image: rabbitmq:3-management
+#     container_name: rabbitmq
+#     environment:
+#       RABBITMQ_DEFAULT_USER: "guest"
+#       RABBITMQ_DEFAULT_PASS: "guest"
+#       RABBITMQ_DEFAULT_VHOST: "/"
+#     expose:
+#       - "5672"
+#     ports:
+#       - 15672:15672
+#       - 5672:5672
+#     volumes:
+#       - ./rabbit/rabbitmq.conf:/etc/rabbitmq.conf:ro
+#       - ./rabbit/rabbitDefs.json:/etc/rabbitmq/definitions.json:ro
 
-  db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_DATABASE: store
-      MYSQL_USER: guest 
-      MYSQL_PASSWORD: guest 
-      MYSQL_ROOT_PASSWORD: root 
-    volumes:
-      - ./db:/var/lib/mysql
-      - ./db-schema:/var/lib/mysql/db-schema
-    ports:
-      - 3306:3306
+#   db:
+#     image: mysql
+#     command: --default-authentication-plugin=mysql_native_password
+#     restart: always
+#     environment:
+#       MYSQL_DATABASE: store
+#       MYSQL_USER: guest 
+#       MYSQL_PASSWORD: guest 
+#       MYSQL_ROOT_PASSWORD: root 
+#     volumes:
+#       - ./db:/var/lib/mysql
+#     ports:
+#       - 3306:3306
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
-    environment:
-      PMA_ARTBITRARY: 1
-      MYSQL_USER: guest
-      MYSQL_PASSWORD: guest 
-      MYSQL_ROOT_PASSWORD: root
+#   phpmyadmin:
+#     image: phpmyadmin/phpmyadmin
+#     restart: always
+#     environment:
+#       PMA_ARTBITRARY: 1
+#       MYSQL_USER: guest
+#       MYSQL_PASSWORD: guest 
+#       MYSQL_ROOT_PASSWORD: root
+#     ports:
+#       - 8085:80
+#     links:
+#       - db:db
+#     depends_on:
+#       - db
+
+  # https://elk-docker.readthedocs.io/
+  elk:
+    image: sebp/elk
     ports:
-      - 8085:80
-    links:
-      - db:db
-    depends_on:
-      - db
+      - "5601:5601"
+      - "9200:9200"
+      - "5044:5044"
 
   # filebeat:
   #   image: docker.elastic.co/beats/filebeat:6.3.1
