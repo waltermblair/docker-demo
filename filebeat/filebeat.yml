@@ -1,0 +1,17 @@
+output:
+  logstash:
+    enabled: true
+    hosts:
+      - elk:5044
+    ssl:
+      enabled: false
+      ssl_certificate_verification: false
+    timeout: 15
+
+filebeat:
+  prospectors:
+    -
+      paths:
+        - /var/log/syslog
+        - /var/log/auth.log
+      document_type: syslog
