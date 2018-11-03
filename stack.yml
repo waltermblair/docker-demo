@@ -1,81 +1,75 @@
 version: '3.1'
 
-# volumes:
-#   db:
-#     driver: local
-
 services:
-#   gui: # https://mherman.org/blog/dockerizing-a-react-app/
-#     image: localhost:5000/my-gui
-#     container_name: gui
-#     build:
-#       context: ../app/
-#       dockerfile: Dockerfile
-#     volumes:
-#       - ../app:/usr/src/app
-#       - /usr/src/app/node_modules
-#     ports:
-#       - 3000:3000
-#     environment:
-#       - NODE_ENV=development
-#     depends_on:
-#       - brain
+  gui: # https://mherman.org/blog/dockerizing-a-react-app/
+    image: localhost:5000/my-gui
+    container_name: gui
+    build:
+      context: ../app/
+      dockerfile: Dockerfile
+    volumes:
+      - ../app:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - brain
 
-#   brain:
-#     # image: waltermblair/go-brain
-#     image: localhost:5000/my-brain
-#     container_name: brain
-#     ports:
-#       - 8080:8080
-#     logging:
-#       driver: json-file
-#       options:
-#         max-size: "200k"
-#         max-file: "10"
-#     external_links:
-#       - rabbitmq:docker-rabbitmq
-#       - db:docker-mysql
-#     environment:
-#       RABBIT_HOST: docker-rabbitmq
-#       THIS_QUEUE: "0"
-#       MYSQL_HOST: docker-mysql
-#     depends_on:
-#       - rabbitmq
-#       - db
+  brain:
+    # image: waltermblair/go-brain
+    image: localhost:5000/my-brain
+    container_name: brain
+    ports:
+      - 8080:8080
+    logging:
+      driver: json-file
+      options:
+        max-size: "200k"
+        max-file: "10"
+    external_links:
+      - rabbitmq:docker-rabbitmq
+      - mysql:docker-mysql
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "0"
+      MYSQL_HOST: docker-mysql
+    depends_on:
+      - rabbitmq
+      - mysql
 
-# # # TODO - deploy: mode: replicated replicas: 2
-#   logic:
-#     # image: waltermblair/go-logic
-#     image: localhost:5000/my-logic
-#     container_name: logic1
-#     external_links:
-#       - rabbitmq:docker-rabbitmq
-#     environment: 
-#       RABBIT_HOST: docker-rabbitmq
-#       THIS_QUEUE: "1"
-#     ports:
-#       - 8081:8080
-#     depends_on:
-#       - rabbitmq
+# # TODO - deploy: mode: replicated replicas: 2
+  logic:
+    # image: waltermblair/go-logic
+    image: localhost:5000/my-logic
+    container_name: logic1
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment: 
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "1"
+    ports:
+      - 8081:8080
+    depends_on:
+      - rabbitmq
 
-#   rabbitmq:
-#     image: rabbitmq:3-management
-#     container_name: rabbitmq
-#     environment:
-#       RABBITMQ_DEFAULT_USER: "guest"
-#       RABBITMQ_DEFAULT_PASS: "guest"
-#       RABBITMQ_DEFAULT_VHOST: "/"
-#     expose:
-#       - "5672"
-#     ports:
-#       - 15672:15672
-#       - 5672:5672
-#     volumes:
-#       - ./rabbit/rabbitmq.conf:/etc/rabbitmq.conf:ro
-#       - ./rabbit/rabbitDefs.json:/etc/rabbitmq/definitions.json:ro
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    expose:
+      - "5672"
+    ports:
+      - 15672:15672
+      - 5672:5672
+    volumes:
+      - ./rabbit/rabbitmq.conf:/etc/rabbitmq.conf:ro
+      - ./rabbit/rabbitDefs.json:/etc/rabbitmq/definitions.json:ro
 
-#  data:
-#    build: resources/mysql/schema/.
   mysql:
     image: mysql
     ports:
@@ -87,9 +81,6 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
     - ./mysql/init:/docker-entrypoint-initdb.d
-    # - ./resources/mysql/certs:/etc/certs
-#    volumes_from:
-#    - data
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
