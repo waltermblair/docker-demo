@@ -1,28 +1,23 @@
 ## initial setup
-edit stack.yml to pull brain and logic images from docker hub or from local registry (see below)
-```
-docker-compose -f stack.yml pull && docker-compose -f stack.yml up
-docker-compose down
-```
-replace db/store with db-schema/store
+Edit stack.yml to pull brain and logic images from local registry
 
 ## running
 ```
-docker-compose -f stack.yml pull && docker-compose -f stack.yml up
+docker-compose -f stack.yml up
 ```
 
-## local docker registry
+## development & local docker registry
+For local development, you'll want to be sure your stack.yml pulls image from local registry rather than docker hub (see instructions further down).
+
+When you edit an app, be sure to rebuild the image, push it to the local registry, and pull down the new version:
 <!-- https://docs.docker.com/registry/deploying/#copy-an-image-from-docker-hub-to-your-registry -->
 ```
 docker run -d -p 5000:5000 --restart=always --name registry registry:2
 ```
-or for stable volume:
-```
-docker run -d -p 5000:5000 --restart=always --name registry -v /mnt/registry:/var/lib/registry registry:2
-```
 cd to your app:
 ```
 docker build . -t localhost:5000/my-app && docker push localhost:5000/my-app
+docker-compose -f stack.yml pull && docker-compose -f stack.yml up
 ```
 
 ## docker logging
