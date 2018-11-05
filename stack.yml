@@ -1,79 +1,69 @@
 version: '3.1'
 
 services:
-#   gui: # https://mherman.org/blog/dockerizing-a-react-app/
-#     image: localhost:5000/my-gui
-#     container_name: gui
-#     build:
-#       context: ../app/
-#       dockerfile: Dockerfile
-#     volumes:
-#       - ../app:/usr/src/app
-#       - /usr/src/app/node_modules
-#     ports:
-#       - 3000:3000
-#     environment:
-#       - NODE_ENV=development
-#     depends_on:
-#       - brain
+  gui: # https://mherman.org/blog/dockerizing-a-react-app/
+    image: localhost:5000/my-gui
+    container_name: gui
+    build:
+      context: ../app/
+      dockerfile: Dockerfile
+    volumes:
+      - ../app:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - brain
 
-  # brain:
-  #   # image: waltermblair/go-brain
-  #   image: localhost:5000/my-brain
-  #   container_name: brain
-  #   ports:
-  #     - 8080:8080
-  #   # logging:
-  #   #   driver: syslog
-  #   #   options:
-  #   #     syslog-address: "tcp+tls://127.0.0.1:5044"
-  #   #     syslog-tls-cert: "filebeat/logstash-beats.crt"
-  #   external_links:
-  #     - rabbitmq:docker-rabbitmq
-  #     - mysql:docker-mysql
-  #   environment:
-  #     RABBIT_HOST: docker-rabbitmq
-  #     THIS_QUEUE: "0"
-  #     MYSQL_HOST: docker-mysql
-  #   depends_on:
-  #     - rabbitmq
-  #     - mysql
-    # links:
-    #   - elk
-    # volumes:
-    #   - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-    #   - ./filebeat/logstash-beats.crt:/etc/pki/tls/certs/logstash-beats.crt
+  brain:
+    # image: waltermblair/go-brain
+    image: localhost:5000/my-brain
+    container_name: brain
+    ports:
+      - 8080:8080
+    external_links:
+      - rabbitmq:docker-rabbitmq
+      - mysql:docker-mysql
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "0"
+      MYSQL_HOST: docker-mysql
+    depends_on:
+      - rabbitmq
+      - mysql
 
-# # # TODO - deploy: mode: replicated replicas: 2
-#   logic:
-#     # image: waltermblair/go-logic
-#     image: localhost:5000/my-logic
-#     container_name: logic1
-#     external_links:
-#       - rabbitmq:docker-rabbitmq
-#     environment:
-#       RABBIT_HOST: docker-rabbitmq
-#       THIS_QUEUE: "1"
-#     ports:
-#       - 8081:8080
-#     depends_on:
-#       - rabbitmq
+# # TODO - deploy: mode: replicated replicas: 2
+  logic:
+    # image: waltermblair/go-logic
+    image: localhost:5000/my-logic
+    container_name: logic1
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "1"
+    ports:
+      - 8081:8080
+    depends_on:
+      - rabbitmq
 
-  # rabbitmq:
-  #   image: rabbitmq:3-management
-  #   container_name: rabbitmq
-  #   environment:
-  #     RABBITMQ_DEFAULT_USER: "guest"
-  #     RABBITMQ_DEFAULT_PASS: "guest"
-  #     RABBITMQ_DEFAULT_VHOST: "/"
-  #   expose:
-  #     - "5672"
-  #   ports:
-  #     - 15672:15672
-  #     - 5672:5672
-  #   volumes:
-  #     - ./rabbit/rabbitmq.conf:/etc/rabbitmq.conf:ro
-  #     - ./rabbit/rabbitDefs.json:/etc/rabbitmq/definitions.json:ro
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    expose:
+      - "5672"
+    ports:
+      - 15672:15672
+      - 5672:5672
+    volumes:
+      - ./rabbit/rabbitmq.conf:/etc/rabbitmq.conf:ro
+      - ./rabbit/rabbitDefs.json:/etc/rabbitmq/definitions.json:ro
 
   mysql:
     image: mysql
@@ -103,16 +93,15 @@ services:
     depends_on:
       - mysql
 
-    #Elasticsearch container
   elasticsearch:
     container_name: elasticsearch
     hostname: elasticsearch
     image: "docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}"
     environment:
-      - http.host=0.0.0.0
-      - transport.host=127.0.0.1
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}"
+      http.host: 0.0.0.0
+      transport.host: 127.0.0.1
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: -Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}
     ulimits:
       memlock:
         soft: -1
@@ -120,67 +109,64 @@ services:
     volumes:
       - ./config/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/elasticsearch.yml
       # - esdata:/usr/share/elasticsearch/data
-    #Port 9200 is available on the host. Need to for user to access as well as Packetbeat
-    ports: ['9200:9200']
-    #Healthcheck to confirm availability of ES. Other containers wait on this.
+    ports:
+      - 9200:9200
     healthcheck:
       test: ["CMD", "curl","-s" ,"-f", "-u", "elastic:${ES_PASSWORD}", "http://localhost:9200/_cat/health"]
-    #Internal network for the containers
-    networks: ['stack']
+    networks:
+      - stack
 
-  #Kibana container
   kibana:
     container_name: kibana
     hostname: kibana
     image: "docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}"
     volumes:
       - ./config/kibana/kibana.yml:/usr/share/kibana/kibana.yml
-    #Port 5601 accessible on the host
-    ports: ['5601:5601']
+    ports:
+      - 5601:5601
     networks: ['stack']
-    #We don't start Kibana until the ES instance is ready
     depends_on:
       - elasticsearch
     restart: on-failure
     environment:
-      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
+      ELASTICSEARCH_PASSWORD: ${ES_PASSWORD}
     healthcheck:
       test: ["CMD", "curl", "-s", "-f", "http://localhost:5601/login"]
       retries: 6
 
-  #Filebeat container
   filebeat:
     container_name: filebeat
     hostname: filebeat
     user: root
     image: "docker.elastic.co/beats/filebeat:${ELASTIC_VERSION}"
     volumes:
-      #Mount the filebeat configuration so users can make edit
       - ./config/beats/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      #Mount the prospectors directory. Users can in turn add propspectors to this directory and they will be dynamically loaded
       - ./config/beats/filebeat/prospectors.d/:/usr/share/filebeat/prospectors.d/
-      #Mount the mysql logs into the filebeat container so we can access and and index them using the filebeat apache module
       - ./logs/mysql/:/var/log/mysql/
-      #Mount the hosts system log directory. This represents the logs of the VM hosting docker. Consumed by the filebeat system module.
       - /private/var/log/:/var/log/host/:ro
-      #Mount the docker logs for indexing by the custom prospector ./config/filebeat/prospectors.d
       - /var/lib/docker/containers:/hostfs/var/lib/docker/containers
-      #Named volume fsdata. This is used to persist the registry file between restarts, so to avoid data duplication
       - fbdata:/usr/share/filebeat/data/
-    networks: ['stack']
+    networks:
+      - stack
     command: filebeat -e -E output.elasticsearch.username=elastic -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
     restart: on-failure
     depends_on:
       - elasticsearch
 
-    #Configure Stack container. This short lived container configures the stack once Kibana and Elasticsearch are available. More specifically, using a script it sets passwords, import dashboards, sets a default index pattern, loads templates and pipelines
   configure_stack:
     container_name: configure_stack
     image: docker.elastic.co/beats/metricbeat:${ELASTIC_VERSION}
-    volumes: ['./init/configure-stack.sh:/usr/local/bin/configure-stack.sh:ro','./init/pipelines/:/usr/local/bin/pipelines/','./init/templates/:/usr/local/bin/templates/']
+    volumes:
+      - ./init/configure-stack.sh:/usr/local/bin/configure-stack.sh:ro
+      - ./init/pipelines/:/usr/local/bin/pipelines/
+      - ./init/templates/:/usr/local/bin/templates/
     command: ['/bin/bash', '-c', 'cat /usr/local/bin/configure-stack.sh | tr -d "\r" | bash']
-    networks: ['stack']
-    environment: ['ELASTIC_VERSION=${ELASTIC_VERSION}','ES_PASSWORD=${ES_PASSWORD}','DEFAULT_INDEX_PATTERN=${DEFAULT_INDEX_PATTERN}']
+    networks:
+      - stack
+    environment: 
+      ELASTIC_VERSION: ${ELASTIC_VERSION}
+      ES_PASSWORD: ${ES_PASSWORD}
+      DEFAULT_INDEX_PATTERN=: ${DEFAULT_INDEX_PATTERN}
     depends_on:
       - elasticsearch
       - kibana
@@ -189,7 +175,7 @@ volumes:
   #Es data
   # esdata:
   #   driver: local
-  #Filebeat data i.e. registry file
   fbdata:
     driver: local
+
 networks: {stack: {}}
