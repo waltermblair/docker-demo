@@ -19,25 +19,16 @@ curl -s -XPUT -u elastic:${ES_PASSWORD} 'elasticsearch:9200/_xpack/security/user
   \"password\" : \"${ES_PASSWORD}\"
 }"
 
-
 # Wait for Kibana to start up before doing anything.
 until curl -s http://kibana:5601/login -o /dev/null; do
     echo Waiting for Kibana...
     sleep 1
 done
 
-# Import the standard Beats dashboards.
-/usr/share/metricbeat/scripts/import_dashboards \
-  -beat '' \
-  -file /usr/share/metricbeat/beats-dashboards-${ELASTIC_VERSION}.zip \
-  -es http://elasticsearch:9200 \
-  -user elastic \
-  -pass ${ES_PASSWORD}
-
-
-# Set the default index pattern.
-curl -s -XPUT http://elastic:${ES_PASSWORD}@elasticsearch:9200/.kibana/config/${ELASTIC_VERSION} \
-     -d "{\"defaultIndex\" : \"${DEFAULT_INDEX_PATTERN}\"}"
+# Import the kibana index pattern, visualization, and dashboard that I exported after creating manually
+# https://discuss.elastic.co/t/kibana-6-4-script-to-import-dashboards-visualisation-search-and-index/147186
+echo "Importing kibana dashboard into elasticsearch"
+curl -s -XPOST -u elastic:${ES_PASSWORD} 'kibana:5601/api/kibana/dashboards/import' -H 'Content-Type: application/json' -H "kbn-xsrf: true" -d @/usr/local/export.json
 
 # Load any declared ingest pipelines
 PIPELINES=/usr/local/bin/pipelines/*.json

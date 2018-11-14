@@ -160,6 +160,7 @@ services:
       - ./init/configure-stack.sh:/usr/local/bin/configure-stack.sh:ro
       - ./init/pipelines/:/usr/local/bin/pipelines/
       - ./init/templates/:/usr/local/bin/templates/
+      - ./init/export.json:/usr/local/export.json
     command: ['/bin/bash', '-c', 'cat /usr/local/bin/configure-stack.sh | tr -d "\r" | bash']
     networks:
       - stack
