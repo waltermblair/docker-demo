@@ -1,8 +1,8 @@
 version: '3.1'
 
 services:
-  gui: # https://mherman.org/blog/dockerizing-a-react-app/
-    image: localhost:5000/my-gui
+  gui:
+    image: ${DOCKER_REGISTRY}/${GUI_IMAGE}
     container_name: gui
     build:
       context: ../app/
@@ -18,8 +18,7 @@ services:
       - brain
 
   brain:
-    # image: waltermblair/go-brain
-    image: localhost:5000/my-brain
+    image: ${DOCKER_REGISTRY}/${BRAIN_IMAGE}
     container_name: brain
     ports:
       - 8080:8080
@@ -33,21 +32,6 @@ services:
     depends_on:
       - rabbitmq
       - mysql
-
-# # TODO - deploy: mode: replicated replicas: 2
-  logic:
-    # image: waltermblair/go-logic
-    image: localhost:5000/my-logic
-    container_name: logic1
-    external_links:
-      - rabbitmq:docker-rabbitmq
-    environment:
-      RABBIT_HOST: docker-rabbitmq
-      THIS_QUEUE: "1"
-    ports:
-      - 8081:8080
-    depends_on:
-      - rabbitmq
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -87,95 +71,308 @@ services:
       MYSQL_PASSWORD: guest
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - 8085:80
+      - 8070:80
     links:
       - mysql:db
     depends_on:
       - mysql
 
-  elasticsearch:
-    container_name: elasticsearch
-    hostname: elasticsearch
-    image: "docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}"
+  # elasticsearch:
+  #   container_name: elasticsearch
+  #   hostname: elasticsearch
+  #   image: "docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}"
+  #   environment:
+  #     http.host: 0.0.0.0
+  #     transport.host: 127.0.0.1
+  #     bootstrap.memory_lock: "true"
+  #     ES_JAVA_OPTS: -Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   volumes:
+  #     - ./config/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/elasticsearch.yml
+  #     # - esdata:/usr/share/elasticsearch/data
+  #   ports:
+  #     - 9200:9200
+  #   healthcheck:
+  #     test: ["CMD", "curl","-s" ,"-f", "-u", "elastic:${ES_PASSWORD}", "http://localhost:9200/_cat/health"]
+  #   networks:
+  #     - stack
+
+  # kibana:
+  #   container_name: kibana
+  #   hostname: kibana
+  #   image: "docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}"
+  #   volumes:
+  #     - ./config/kibana/kibana.yml:/usr/share/kibana/kibana.yml
+  #   ports:
+  #     - 5601:5601
+  #   networks: ['stack']
+  #   depends_on:
+  #     - elasticsearch
+  #   restart: on-failure
+  #   environment:
+  #     ELASTICSEARCH_PASSWORD: ${ES_PASSWORD}
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-s", "-f", "http://localhost:5601/login"]
+  #     retries: 6
+
+  # filebeat:
+  #   container_name: filebeat
+  #   hostname: filebeat
+  #   user: root
+  #   image: "docker.elastic.co/beats/filebeat:${ELASTIC_VERSION}"
+  #   volumes:
+  #     - ./config/beats/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+  #     - ./config/beats/filebeat/prospectors.d/:/usr/share/filebeat/prospectors.d/
+  #     - ./logs/mysql/:/var/log/mysql/
+  #     - /private/var/log/:/var/log/host/:ro
+  #     - /var/lib/docker/containers:/hostfs/var/lib/docker/containers
+  #     - fbdata:/usr/share/filebeat/data/
+  #   networks:
+  #     - stack
+  #   command: filebeat -e -E output.elasticsearch.username=elastic -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
+  #   restart: on-failure
+  #   depends_on:
+  #     - elasticsearch
+
+  # configure_stack:
+  #   container_name: configure_stack
+  #   image: docker.elastic.co/beats/metricbeat:${ELASTIC_VERSION}
+  #   volumes:
+  #     - ./init/configure-stack.sh:/usr/local/bin/configure-stack.sh:ro
+  #     - ./init/pipelines/:/usr/local/bin/pipelines/
+  #     - ./init/templates/:/usr/local/bin/templates/
+  #     - ./init/export.json:/usr/local/export.json
+  #   command: ['/bin/bash', '-c', 'cat /usr/local/bin/configure-stack.sh | tr -d "\r" | bash']
+  #   networks:
+  #     - stack
+  #   environment: 
+  #     ELASTIC_VERSION: ${ELASTIC_VERSION}
+  #     ES_PASSWORD: ${ES_PASSWORD}
+  #     DEFAULT_INDEX_PATTERN=: ${DEFAULT_INDEX_PATTERN}
+  #   depends_on:
+  #     - elasticsearch
+  #     - kibana
+
+  logic1:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
     environment:
-      http.host: 0.0.0.0
-      transport.host: 127.0.0.1
-      bootstrap.memory_lock: "true"
-      ES_JAVA_OPTS: -Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - ./config/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/elasticsearch.yml
-      # - esdata:/usr/share/elasticsearch/data
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "1"
     ports:
-      - 9200:9200
-    healthcheck:
-      test: ["CMD", "curl","-s" ,"-f", "-u", "elastic:${ES_PASSWORD}", "http://localhost:9200/_cat/health"]
-    networks:
-      - stack
-
-  kibana:
-    container_name: kibana
-    hostname: kibana
-    image: "docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}"
-    volumes:
-      - ./config/kibana/kibana.yml:/usr/share/kibana/kibana.yml
-    ports:
-      - 5601:5601
-    networks: ['stack']
+      - 8081:8080
     depends_on:
-      - elasticsearch
-    restart: on-failure
+      - rabbitmq
+
+  logic2:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
     environment:
-      ELASTICSEARCH_PASSWORD: ${ES_PASSWORD}
-    healthcheck:
-      test: ["CMD", "curl", "-s", "-f", "http://localhost:5601/login"]
-      retries: 6
-
-  filebeat:
-    container_name: filebeat
-    hostname: filebeat
-    user: root
-    image: "docker.elastic.co/beats/filebeat:${ELASTIC_VERSION}"
-    volumes:
-      - ./config/beats/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./config/beats/filebeat/prospectors.d/:/usr/share/filebeat/prospectors.d/
-      - ./logs/mysql/:/var/log/mysql/
-      - /private/var/log/:/var/log/host/:ro
-      - /var/lib/docker/containers:/hostfs/var/lib/docker/containers
-      - fbdata:/usr/share/filebeat/data/
-    networks:
-      - stack
-    command: filebeat -e -E output.elasticsearch.username=elastic -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
-    restart: on-failure
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "2"
+    ports:
+      - 8082:8080
     depends_on:
-      - elasticsearch
+      - rabbitmq
 
-  configure_stack:
-    container_name: configure_stack
-    image: docker.elastic.co/beats/metricbeat:${ELASTIC_VERSION}
-    volumes:
-      - ./init/configure-stack.sh:/usr/local/bin/configure-stack.sh:ro
-      - ./init/pipelines/:/usr/local/bin/pipelines/
-      - ./init/templates/:/usr/local/bin/templates/
-      - ./init/export.json:/usr/local/export.json
-    command: ['/bin/bash', '-c', 'cat /usr/local/bin/configure-stack.sh | tr -d "\r" | bash']
-    networks:
-      - stack
-    environment: 
-      ELASTIC_VERSION: ${ELASTIC_VERSION}
-      ES_PASSWORD: ${ES_PASSWORD}
-      DEFAULT_INDEX_PATTERN=: ${DEFAULT_INDEX_PATTERN}
+  logic3:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "3"
+    ports:
+      - 8083:8080
     depends_on:
-      - elasticsearch
-      - kibana
+      - rabbitmq
+
+  logic4:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "4"
+    ports:
+      - 8084:8080
+    depends_on:
+      - rabbitmq
+
+  logic5:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "5"
+    ports:
+      - 8085:8080
+    depends_on:
+      - rabbitmq
+
+  logic6:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "6"
+    ports:
+      - 8086:8080
+    depends_on:
+      - rabbitmq
+
+  logic7:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "7"
+    ports:
+      - 8087:8080
+    depends_on:
+      - rabbitmq
+
+  logic8:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "8"
+    ports:
+      - 8088:8080
+    depends_on:
+      - rabbitmq
+
+  logic9:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "9"
+    ports:
+      - 8089:8080
+    depends_on:
+      - rabbitmq
+
+  logic10:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "10"
+    ports:
+      - 8090:8080
+    depends_on:
+      - rabbitmq
+
+  logic11:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "11"
+    ports:
+      - 8091:8080
+    depends_on:
+      - rabbitmq
+
+  logic12:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "12"
+    ports:
+      - 8092:8080
+    depends_on:
+      - rabbitmq
+
+  logic13:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "13"
+    ports:
+      - 8093:8080
+    depends_on:
+      - rabbitmq
+
+  logic14:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "14"
+    ports:
+      - 8094:8080
+    depends_on:
+      - rabbitmq
+
+  logic15:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "15"
+    ports:
+      - 8095:8080
+    depends_on:
+      - rabbitmq
+
+  logic16:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "16"
+    ports:
+      - 8096:8080
+    depends_on:
+      - rabbitmq
+
+  logic17:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "17"
+    ports:
+      - 8097:8080
+    depends_on:
+      - rabbitmq
+
+  logic18:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "18"
+    ports:
+      - 8098:8080
+    depends_on:
+      - rabbitmq
 
 volumes:
-  #Es data
-  # esdata:
-  #   driver: local
   fbdata:
     driver: local
 

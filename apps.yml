@@ -1,0 +1,213 @@
+version: '3.1'
+
+networks:
+  apps_docker-demo:
+    external: true
+
+services:
+  gui:
+    image: ${DOCKER_REGISTRY}/${GUI_IMAGE}
+    container_name: gui
+    build:
+      context: ../app/
+      dockerfile: Dockerfile
+    volumes:
+      - ../app:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=development
+
+  brain:
+    image: ${DOCKER_REGISTRY}/${BRAIN_IMAGE}
+    container_name: brain
+    ports:
+      - 8080:8080
+    external_links:
+      - rabbitmq:docker-rabbitmq
+      - mysql:docker-mysql
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "0"
+      MYSQL_HOST: docker-mysql
+
+  logic1:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "1"
+    ports:
+      - 8081:8080
+
+  logic2:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "2"
+    ports:
+      - 8082:8080
+
+  logic3:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "3"
+    ports:
+      - 8083:8080
+
+  logic4:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "4"
+    ports:
+      - 8084:8080
+
+  logic5:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "5"
+    ports:
+      - 8085:8080
+
+  logic6:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "6"
+    ports:
+      - 8086:8080
+
+  logic7:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "7"
+    ports:
+      - 8087:8080
+
+  logic8:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "8"
+    ports:
+      - 8088:8080
+
+  logic9:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "9"
+    ports:
+      - 8089:8080
+
+  logic10:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "10"
+    ports:
+      - 8090:8080
+
+  logic11:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "11"
+    ports:
+      - 8091:8080
+
+  logic12:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "12"
+    ports:
+      - 8092:8080
+
+  logic13:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "13"
+    ports:
+      - 8093:8080
+
+  logic14:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "14"
+    ports:
+      - 8094:8080
+
+  logic15:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "15"
+    ports:
+      - 8095:8080
+
+  logic16:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "16"
+    ports:
+      - 8096:8080
+
+  logic17:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "17"
+    ports:
+      - 8097:8080
+
+  logic18:
+    image: ${DOCKER_REGISTRY}/${LOGIC_IMAGE}
+    external_links:
+      - rabbitmq:docker-rabbitmq
+    environment:
+      RABBIT_HOST: docker-rabbitmq
+      THIS_QUEUE: "18"
+    ports:
+      - 8098:8080
