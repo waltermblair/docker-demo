@@ -1,5 +1,12 @@
 # Docker Demo
-See Google slides for project info https://docs.google.com/presentation/d/1TZPJy1iXqKflsw8utwV5Iy6h-e4K2ANZMFpVc2hq8SQ/edit#slide=id.g460225b2dc_0_0
+This project is meant to demonstrate docker-compose. We use a bunch of services (see services.yml) as well as a few apps (see apps.yml) to build a docker-compose application that lets you visit localhost:3000 and interact with a programmable logic device built out of docker containers and RabbitMQ messages.
+
+Source code for apps:
+* https://github.com/waltermblair/go-brain
+* https://github.com/waltermblair/go-logic
+* https://github.com/waltermblair/react
+
+See Google slides for project details https://docs.google.com/presentation/d/1TZPJy1iXqKflsw8utwV5Iy6h-e4K2ANZMFpVc2hq8SQ/edit#slide=id.g460225b2dc_0_0
 
 ## initial setup
 * Install docker
