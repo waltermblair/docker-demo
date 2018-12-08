@@ -1,3 +1,6 @@
+# Docker Demo
+See Google slides for project info https://docs.google.com/presentation/d/1TZPJy1iXqKflsw8utwV5Iy6h-e4K2ANZMFpVc2hq8SQ/edit#slide=id.g460225b2dc_0_0
+
 ## initial setup
 Edit .env DOCKER_REGISTRY to pull brain, logic, and gui images from local registry or github
 
