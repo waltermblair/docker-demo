@@ -17,7 +17,7 @@ See Google slides for project details https://docs.google.com/presentation/d/1TZ
 docker-compose -f services.yml up
 docker-compose -f apps.yml up
 ```
-go get a cup of coffee while everything downloads, and then find app at localhost:3000
+Go get a cup of coffee while everything downloads, and then find app at localhost:3000. To poke at the other apps and services that are running, check apps.yml and services.yml for what port they're using on localhost. For example, kibana is on localhost:5601
 
 ## development & local docker registry
 For local development, you'll want to be sure your apps.yml pulls image from local registry rather than docker hub.
