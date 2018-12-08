@@ -17,7 +17,7 @@ See Google slides for project details https://docs.google.com/presentation/d/1TZ
 docker-compose -f services.yml up
 docker-compose -f apps.yml up
 ```
-find app at localhost:3000
+go get a cup of coffee while everything downloads, and then find app at localhost:3000
 
 ## development & local docker registry
 For local development, you'll want to be sure your apps.yml pulls image from local registry rather than docker hub.
