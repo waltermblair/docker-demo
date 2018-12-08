@@ -34,14 +34,3 @@ docker build . -t localhost:5000/my-app && docker push localhost:5000/my-app
 docker-compose -f apps.yml pull && docker-compose -f apps.yml up
 ```
 
-## docker logging
-this is where logs are stored on the vm:
-```
-docker inspect --format='{{.LogPath}}' containername
-```
-to get to vm:
-```
-screen ~/Library/Containers/com.docker.docker/Data/com.docker.driver.amd64-linux/tty
-cd ../var/lib/docker/
-```
-
