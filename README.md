@@ -11,7 +11,6 @@ See Google slides for project details https://docs.google.com/presentation/d/1TZ
 ## initial setup
 * Install docker
 * Install docker-compose (included in Docker for Mac)
-* Edit .env DOCKER_REGISTRY to pull brain, logic, and gui images from local registry or github
 
 ## running
 ```
@@ -21,7 +20,9 @@ docker-compose -f apps.yml up
 find app at localhost:3000
 
 ## development & local docker registry
-For local development, you'll want to be sure your apps.yml pulls image from local registry rather than docker hub (see instructions further down).
+For local development, you'll want to be sure your apps.yml pulls image from local registry rather than docker hub.
+
+* Edit .env DOCKER_REGISTRY to pull brain, logic, and gui images from local registry 
 
 When you edit an app, be sure to rebuild the image, push it to the local registry, and pull down the new version:
 <!-- https://docs.docker.com/registry/deploying/#copy-an-image-from-docker-hub-to-your-registry -->
